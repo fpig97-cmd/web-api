@@ -114,7 +114,14 @@ def download_verify_logs_csv(
     writer = csv.writer(output)
     writer.writerow(["guild_id", "user_id", "action", "detail", "created_at"])
     for r in rows:
-        writer.writerow([r[0], r[1], r[2], r[3], r[4]])
+        writer.writerow([
+            str(r[0]),          # guild_id를 문자열로
+            str(r[1]),          # user_id를 문자열로
+            r[2],
+            r[3],
+        str(r[4]),
+        ])
+
 
     output.seek(0)
 
