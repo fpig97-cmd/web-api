@@ -44,6 +44,38 @@ def create_log(item: LogItem):
 
 
 # ----- 인증 성공 로그 조회 (JSON) -----
+@app.get("/api/user-status")
+def get_user_status(guild_id: int, user_id: int):
+    """
+    특정 길드 + 디코 유저의 최신 인증 성공 로그 1개만 반환
+    (없으면 404)
+    """
+    row = cur.execute(
+        """
+        SELECT guild_id, user_id, action, detail, created_at
+        FROM logs
+        WHERE action = 'verify_success'
+          AND guild_id = ?
+          AND user_id = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+        """,
+        (guild_id, user_id),
+    ).fetchone()
+
+    if not row:
+        # FastAPI에서 404 던지기
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="인증 로그 없음")
+
+    return {
+        "guild_id": row[0],
+        "user_id": row[1],
+        "action": row[2],
+        "detail": row[3],      # 예: "SkyLunarx (123456789)" 이런 식
+        "created_at": row[4],
+    }
+
 @app.get("/api/logs/verify")
 def get_verify_logs(
     guild_id: int | None = None,
